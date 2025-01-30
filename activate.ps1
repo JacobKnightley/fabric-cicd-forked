@@ -1,4 +1,26 @@
-function global:env.activate() {
+# Check if pip is installed
+if (Get-Command pip -ErrorAction SilentlyContinue) {
+    # Check if uv is installed
+    if (-not -not (pip show uv -q)) {
+        pip install uv
+    }
+    else {
+        Write-Host "uv is already installed."
+    }
+
+    # Check if ruff is installed
+    if (-not -not (pip show ruff -q)) {
+        pip install ruff
+    }
+    else {
+        Write-Host "ruff is already installed."
+    
+    }
+    else {
+        Write-Host "pip is not installed. Please install python first."
+    }
+
+    # Activate the environment
     uv sync  --python 3.11
     $venvPath = ".venv\Scripts\activate.ps1"
 
@@ -9,37 +31,7 @@ function global:env.activate() {
     else {
         Write-Host "venv not found"
     }
-}
 
-function global:env.deactivate() {
-    if (Get-Command -Name deactivate -CommandType Function -ErrorAction SilentlyContinue) {
-        deactivate
-        Write-Host "venv deactivated"
-    }
-    else {
-        Write-Host "venv not activated"
-    }
-}
-
-# Check if pip is installed
-if (Get-Command pip -ErrorAction SilentlyContinue) {
-    # Install ruff and uv with error handling
-    try {
-        pip install uv
-        pip install ruff
-    }
-    catch {
-        Write-Host "Failed to install packages. Please check your pip installation."
-    }
-}
-else {
-    Write-Host "pip is not installed. Please install python first."
-}
-
-# Activate the environment
-env.activate
-
-Write-Host "To activate the environment, run " -NoNewline
-Write-Host "env.activate" -ForegroundColor Green
-Write-Host "To deactivate the environment, run " -NoNewline
-Write-Host "env.deactivate" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "To deactivate the environment, run " -NoNewline
+    Write-Host "deactivate" -ForegroundColor Green

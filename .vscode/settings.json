@@ -40,7 +40,6 @@
         "editor.formatOnSave": true
     },
     "git": {
-        "branchPrefix": "users/",
         "enableSmartCommit": true,
         "confirmSync": false,
         "autofetch": true
@@ -52,5 +51,6 @@
     "prettier": {
         "tabWidth": 4,
         "useTabs": false
-    }
+    },
+    "python.terminal.activateEnvironment": false
 }
