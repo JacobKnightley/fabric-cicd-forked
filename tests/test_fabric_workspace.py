@@ -17,7 +17,6 @@ def mock_endpoint():
     """Mock FabricEndpoint to avoid real API calls."""
     mock = MagicMock()
     mock.invoke.return_value = {"body": {"value": []}}
-    mock.upn_auth = True
     return mock
 
 

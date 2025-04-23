@@ -11,7 +11,7 @@ FEATURE_FLAG = set()
 USER_AGENT = f"ms-fabric-cicd/{VERSION}"
 
 # Item Type
-ACCEPTED_ITEM_TYPES_UPN = (
+ACCEPTED_ITEM_TYPES = (
     "DataPipeline",
     "Environment",
     "Notebook",
@@ -21,7 +21,6 @@ ACCEPTED_ITEM_TYPES_UPN = (
     "MirroredDatabase",
     "VariableLibrary",
 )
-ACCEPTED_ITEM_TYPES_NON_UPN = ACCEPTED_ITEM_TYPES_UPN
 
 # Publish
 MAX_RETRY_OVERRIDE = {"SemanticModel": 10, "Report": 10, "VariableLibrary": 7}
@@ -80,3 +79,8 @@ PARAMETER_MSGS = {
 
 
 INDENT = "->"
+
+# API Scopes
+SCOPE_FABRIC_DEFAULT = "https://api.fabric.microsoft.com/.default"
+SCOPE_ONELAKE_DEFAULT = "https://storage.azure.com/.default"
+SCOPE_AZURE_DEFAULT = "https://management.azure.com/.default"

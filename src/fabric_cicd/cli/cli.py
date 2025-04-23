@@ -1,49 +1,38 @@
+import sys
+
+if sys.version_info < (3, 10):
+    msg = "This module requires Python 3.10 or newer."
+    raise RuntimeError(msg)
+
 import os
+import subprocess
 
 from azure.identity import DefaultAzureCredential
 
-# from fabric_cli.core.fab_auth import FabAuth
 from fabric_cicd._common._fabric_endpoint import FabricEndpoint
 
-SCOPE_FABRIC_DEFAULT = ["https://analysis.windows.net/powerbi/api/.default"]
-SCOPE_ONELAKE_DEFAULT = ["https://storage.azure.com/.default"]
-SCOPE_AZURE_DEFAULT = ["https://management.azure.com/.default"]
+
+def call_fabric_cli(fabric_endpoint, command_str):
+    env = os.environ.copy()
+    env["FAB_TOKEN"] = fabric_endpoint.fab_token.aad_token
+    env["FAB_TOKEN_ONELAKE"] = fabric_endpoint.fab_token_storage.aad_token
+
+    result = subprocess.run(
+        ["fab", *command_str.split()],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode > 0 or result.stderr:
+        msg = f"Error running fab command. exit_code: '{result.returncode}'; stderr: '{result.stderr}'"
+        raise Exception(msg)
+
+    return result.stdout.strip()
 
 
-fe = FabricEndpoint(DefaultAzureCredential())
-
-# set these os environment variables
-os.environ["FAB_TOKEN"] = fe.fab_token.aad_token
-os.environ["FAB_TOKEN_ONELAKE"] = fe.fab_token_storage.aad_token
-
-# os.environ["FAB_TOKEN_AZURE"] = ""
-
-# print(FabAuth()._get_access_token_from_env_vars_if_exist(SCOPE_FABRIC_DEFAULT))
-
-# t = subprocess.run(["fab", "-c", "ls"], capture_output=True, text=True)
-# print(t)
-
-import contextlib
-import io
-import sys
-
-from fabric_cli.main import main as fab_cli
-
-sys.argv = ["fab", "-c", "ls"]
-
-# Capture stdout and stderr
-stdout_buffer = io.StringIO()
-stderr_buffer = io.StringIO()
-with contextlib.redirect_stdout(stdout_buffer), contextlib.redirect_stderr(stderr_buffer):
-    try:
-        fab_cli()
-    except SystemExit:
-        # Prevent exit from killing your script
-        pass
-
-output = stdout_buffer.getvalue()
-error_output = stderr_buffer.getvalue()
-
-# Now you can use 'output' and 'error_output' as needed
-print("Captured output:", output)
-print("Captured errors:", error_output)
+# Example usage
+if __name__ == "__main__":
+    # Call the "auth login" subcommand programmatically
+    result = call_fabric_cli(FabricEndpoint(DefaultAzureCredential()), "ls")
+    print(result)  # Handle the result as needed

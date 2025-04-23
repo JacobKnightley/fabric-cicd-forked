@@ -144,15 +144,15 @@ def test_invoke_exception(setup_mocks):
 
 
 @pytest.mark.parametrize(
-    ("auth_type", "expected_msg", "expected_upn_auth"),
+    ("auth_type", "expected_msg"),
     [
-        ("upn", "Executing as User 'upnExample'", True),
-        ("appid", "Executing as Application Id 'appidExample'", False),
-        ("oid", "Executing as Object Id 'oidExample'", False),
+        ("upn", "Executing as User 'upnExample'"),
+        ("appid", "Executing as Application Id 'appidExample'"),
+        ("oid", "Executing as Object Id 'oidExample'"),
     ],
     ids=["upn", "appid", "oid"],
 )
-def test_refresh_token(setup_mocks, auth_type, expected_msg, expected_upn_auth):
+def test_refresh_token(setup_mocks, auth_type, expected_msg):
     """Test refreshing token and setting correct identity."""
     dl, mock_requests = setup_mocks
     jwt_token = generate_mock_jwt(authtype=auth_type)
@@ -166,7 +166,6 @@ def test_refresh_token(setup_mocks, auth_type, expected_msg, expected_upn_auth):
     endpoint._refresh_token()
     assert dl.messages == [expected_msg]
     assert endpoint.aad_token == jwt_token
-    assert endpoint.upn_auth is expected_upn_auth
 
 
 @pytest.mark.parametrize(

@@ -3,7 +3,7 @@ name = "fabric-cicd"
 authors = [{ name = "Microsoft Corporation" }]
 description = "Microsoft Fabric CI/CD"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.9,<3.13"
 license = { file = "LICENSE" }
 dynamic = ["version"]
 urls.Repository = "https://github.com/microsoft/fabric-cicd.git"
@@ -12,8 +12,9 @@ dependencies = [
     "azure-identity>=1.19.0",
     "dpath>=2.2.0",
     "filetype>=1.2.0",
-    "ms-fabric-cli>=0.1.10",
+    "ms-fabric-cli>=0.1.10 ; python_full_version >= '3.10'",
     "packaging>=24.2",
+    "pyjwt>=2.10.1",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
 ]

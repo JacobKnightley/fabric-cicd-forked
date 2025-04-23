@@ -30,9 +30,11 @@ class FabricEndpoint:
             requests_module: The requests module.
         """
         self.requests = requests_module
-        self.fab_token = FabricAuth(token_credential, "https://api.fabric.microsoft.com/.default")
-        self.fab_token_storage = FabricAuth(token_credential, "https://storage.azure.com/.default")
-        self.fab_token_azure = FabricAuth(token_credential, "https://management.azure.com/.default")
+        self.fab_token = FabricAuth(token_credential, constants.SCOPE_FABRIC_DEFAULT)
+        self.fab_token_storage = FabricAuth(
+            token_credential, constants.SCOPE_ONELAKE_DEFAULT, disable_print_identity=True
+        )
+        self.fab_token_azure = FabricAuth(token_credential, constants.SCOPE_AZURE_DEFAULT, disable_print_identity=True)
 
     def invoke(self, method: str, url: str, body: str = "{}", files: Optional[dict] = None, **kwargs) -> dict:
         """

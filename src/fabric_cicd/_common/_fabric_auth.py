@@ -3,11 +3,10 @@
 
 """Handles interactions with the Fabric API, including authentication and request management."""
 
-import base64
 import datetime
-import json
 import logging
 
+import jwt
 from azure.core.credentials import TokenCredential
 from azure.core.exceptions import (
     ClientAuthenticationError,
@@ -22,18 +21,20 @@ logger = logging.getLogger(__name__)
 class FabricAuth:
     """Handles authentication with Fabric known APIs"""
 
-    def __init__(self, token_credential: TokenCredential, scope: str) -> None:
+    def __init__(self, token_credential: TokenCredential, scope: str, disable_print_identity: bool = False) -> None:
         """
         Initializes the FabricEndpoint instance, sets up the authentication token.
 
         Args:
             token_credential: The token credential.
             requests_module: The requests module.
+            suppress_identity_print: If True, suppresses the printing of the executing identity.
         """
         self.aad_token = None
         self.aad_storage_token = None
         self.aad_token_expiration = None
         self.token_credential = token_credential
+        self.disable_print_identity = disable_print_identity
         self._refresh_token(scope)
 
     def _refresh_token(self, scope: str) -> None:
@@ -55,7 +56,8 @@ class FabricAuth:
                 raise TokenError(msg, logger) from e
 
             try:
-                decoded_token = _decode_jwt(self.aad_token)
+                decoded_token = jwt.decode(self.aad_token, options={"verify_signature": False})
+
                 expiration = decoded_token.get("exp")
                 upn = decoded_token.get("upn")
                 appid = decoded_token.get("appid")
@@ -67,47 +69,15 @@ class FabricAuth:
                     msg = "Token does not contain expiration claim."
                     raise TokenError(msg, logger)
 
-                if upn:
-                    _log_executing_identity(f"Executing as User '{upn}'")
-                    self.upn_auth = True
-                else:
-                    self.upn_auth = False
-                    if appid:
-                        _log_executing_identity(f"Executing as Application Id '{appid}'")
+                if not self.disable_print_identity and "disable_print_identity" not in constants.FEATURE_FLAG:
+                    if upn:
+                        identity_msg = f"Executing as User '{upn}'"
+                    elif appid:
+                        identity_msg = f"Executing as Application Id '{appid}'"
                     elif oid:
-                        _log_executing_identity(f"Executing as Object Id '{oid}'")
+                        identity_msg = f"Executing as Object Id '{oid}'"
+                    logger.info(identity_msg)
 
             except Exception as e:
                 msg = f"An unexpected error occurred while decoding the credential token. {e}"
                 raise TokenError(msg, logger) from e
-
-
-def _log_executing_identity(msg: str) -> None:
-    if "disable_print_identity" not in constants.FEATURE_FLAG:
-        logger.info(msg)
-
-
-def _decode_jwt(token: str) -> dict:
-    """
-    Decodes a JWT token and returns the payload as a dictionary.
-
-    Args:
-        token: The JWT token to decode.
-    """
-    try:
-        # Split the token into its parts
-        parts = token.split(".")
-        if len(parts) != 3:
-            msg = "The token has an invalid JWT format"
-            raise TokenError(msg, logger)
-
-        # Decode the payload (second part of the token)
-        payload = parts[1]
-        padding = "=" * (4 - len(payload) % 4)
-        payload += padding
-        decoded_bytes = base64.urlsafe_b64decode(payload.encode("utf-8"))
-        decoded_str = decoded_bytes.decode("utf-8")
-        return json.loads(decoded_str)
-    except Exception as e:
-        msg = f"An unexpected error occurred while decoding the credential token. {e}"
-        raise TokenError(msg, logger) from e

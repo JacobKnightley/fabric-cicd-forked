@@ -82,7 +82,7 @@ def validate_parameter_file(
     # Initialize the Parameter object with the validated inputs
     parameter_obj = Parameter(
         repository_directory=validate_repository_directory(repository_directory),
-        item_type_in_scope=validate_item_type_in_scope(item_type_in_scope, upn_auth=endpoint.upn_auth),
+        item_type_in_scope=validate_item_type_in_scope(item_type_in_scope),
         environment=validate_environment(environment),
         parameter_file_name=parameter_file_name,
     )
