@@ -27,11 +27,10 @@ class FabricAuth:
 
         Args:
             token_credential: The token credential.
-            requests_module: The requests module.
-            suppress_identity_print: If True, suppresses the printing of the executing identity.
+            scope: The scope for the token.
+            disable_print_identity: If True, suppresses the printing of the executing identity.
         """
         self.aad_token = None
-        self.aad_storage_token = None
         self.aad_token_expiration = None
         self.token_credential = token_credential
         self.disable_print_identity = disable_print_identity
